@@ -1,13 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Runtime.InteropServices;
-using GameClient.Core;
+﻿GameClient.Core.GameClient client = new();
 
-[DllImport("libGameClient")]
-static extern void start_connection(string addr, int port);
-
-[DllImport("libGameClient")]
-static extern void connect_player();
-
-GameClient.Core.GameClient client = new();
+if (await client.Login("gameclient@test.com", "1234cinco"))
+{
+    System.Console.WriteLine(client.AuthManager.Token);
+}
+else
+{
+    System.Console.WriteLine("Login fucked up");
+}
 
 Console.ReadKey(); // keeps process alive

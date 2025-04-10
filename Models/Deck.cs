@@ -1,12 +1,10 @@
-using System;
-
-namespace GameClient
+namespace GameClient.Models
 {
     public class Deck
     {
-        public string DeckId { get; set; }
-        public string DeckName { get; set; }
-        public List<string> Cards { get; set; }
+        public Guid DeckId { get; set; }
+        public required string DeckName { get; set; }
+        public required List<string> Cards { get; set; }
 
         public int MaxSize { get; set; }
         public int MinimumSize { get; set; }

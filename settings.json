@@ -1,6 +1,7 @@
 {
     "GameServerAddr": "127.0.0.1",
     "AuthServerAddr": "http://localhost:5186",
-    "DeckServerAddr": "http://localhost:0000",
+    "DeckServerAddr": "http://localhost:5259",
+    "CardServerAddr": "http://localhost:0000",
     "MatchmakerServerAddr": "http://localhost:0000"
 }

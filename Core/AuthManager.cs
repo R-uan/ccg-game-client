@@ -19,16 +19,15 @@ namespace GameClient.Core
             this._httpClient.BaseAddress = new Uri(appSettings.AuthServerAddr);
         }
 
-        public async Task<bool> Login(LoginRequest credentials)
+        public async Task Login(LoginRequest credentials)
         {
             try
             {
                 var request = await this._httpClient.PostAsJsonAsync("/api/auth/login", credentials);
                 if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
                 var response = await request.Content.ReadFromJsonAsync<LoginRespose>()
-                    ?? throw new Exception("Login API returned nothing.");
+                    ?? throw new Exception("Auth API returned nothing.");
                 this.Token = response.Token;
-                return true;
             }
             catch (System.Exception)
             {
@@ -36,15 +35,14 @@ namespace GameClient.Core
             }
         }
 
-        public async Task<bool> Register(RegisterRequest credentials)
+        public async Task Register(RegisterRequest credentials)
         {
             try
             {
                 var request = await this._httpClient.PostAsJsonAsync("/api/auth/register", credentials);
-                if (!request.IsSuccessStatusCode)
-                    throw new Exception(await request.Content.ReadAsStringAsync());
-                var response = await request.Content.ReadFromJsonAsync<RegisterRespose>();
-                return true;
+                if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
+                var response = await request.Content.ReadFromJsonAsync<RegisterRespose>()
+                    ?? throw new Exception("Auth API returned nothing.");
             }
             catch (System.Exception)
             {
@@ -52,7 +50,7 @@ namespace GameClient.Core
             }
         }
 
-        public async Task RequestPlayerData()
+        public async Task RequestPlayerProfile()
         {
             if (!this.IsLoggedin())
                 throw new Exception("Client not logged in");
@@ -60,7 +58,7 @@ namespace GameClient.Core
             this._httpClient.DefaultRequestHeaders.Authorization
                 = new AuthenticationHeaderValue("Bearer", this.Token);
 
-            var request = await this._httpClient.GetAsync("/api/auth/profile");
+            var request = await this._httpClient.GetAsync("/api/player/profile");
             var profile = await request.Content.ReadFromJsonAsync<PlayerProfile>() ??
                 throw new Exception("Player API didn't send back data.");
 

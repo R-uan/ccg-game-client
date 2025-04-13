@@ -4,7 +4,7 @@ namespace GameClient.Models
     {
         public Guid DeckId { get; set; }
         public required string DeckName { get; set; }
-        public required List<string> Cards { get; set; }
+        public required List<CardReference> Cards { get; set; }
 
         public int MaxSize { get; set; }
         public int MinimumSize { get; set; }

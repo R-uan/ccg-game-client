@@ -24,14 +24,13 @@ namespace GameClient.Core
                 BaseAddress = new Uri(this._appSettings.DeckServerAddr)
             };
 
-            this._httpClient.DefaultRequestHeaders.Authorization
-                = new AuthenticationHeaderValue("Bearer", this._authManager.Token);
         }
 
         public async Task GetPlayerDeckCollectionAsync()
         {
             try
             {
+                System.Console.WriteLine("Getting player deck collection");
                 var response = await this._httpClient.GetAsync("/api/deck");
                 if (!response.IsSuccessStatusCode)
                     throw new Exception($"Deck API returned {response.StatusCode}");
@@ -39,10 +38,11 @@ namespace GameClient.Core
                 var decks = await response.Content.ReadFromJsonAsync<List<Deck>>()
                     ?? throw new Exception("Deck API returned no data.");
                 this._clientState.PlayerDecks = decks;
+                System.Console.WriteLine("player deck collection successfuly gotten");
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                // Need to make a logger
+                System.Console.WriteLine(ex.Message);
                 throw new Exception("Failed to fetch player deck collection.");
             }
         }
@@ -53,6 +53,12 @@ namespace GameClient.Core
             if (!response.IsSuccessStatusCode) throw new Exception("Deck creation request failed.");
             var deck = await response.Content.ReadFromJsonAsync<Deck>() ?? throw new Exception("Didn't return sh..");
             return deck;
+        }
+
+        public void SetBearerToken()
+        {
+            this._httpClient.DefaultRequestHeaders.Authorization
+                = new AuthenticationHeaderValue("Bearer", this._authManager.Token);
         }
     }
 }

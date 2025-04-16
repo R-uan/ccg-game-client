@@ -27,6 +27,9 @@ public class GameClient
         this.CardService = new CardService(this.ClientState, this.AppSettings);
         this.AuthManager = new AuthManager(this.ClientState, this.AppSettings);
         this.DeckService = new DeckService(this.AuthManager, this.ClientState, this.AppSettings);
+
+        AuthManager.OnAuthentication += this.DeckService.SetBearerToken;
+        AuthManager.OnAuthentication += this.AuthManager.SetBearerToken;
     }
 
     public async Task<Result<bool>> Login(string email, string password)

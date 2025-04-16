@@ -9,14 +9,28 @@ namespace GameClient.Models
         public int MaxSize { get; set; }
         public int MinimumSize { get; set; }
 
-        public bool AddCard(string cardId)
+        public bool AddCard(Guid cardId, int amount)
         {
-            if (Cards.Count >= MaxSize) { return false; }
-            Cards.Add(cardId);
+            if ((Cards.Count + amount) > MaxSize) { return false; }
+            var exists = this.Cards.Find(card => card.Id == cardId);
+            if (exists != null)
+            {
+                exists.Amount += amount;
+                return true;
+            }
+
+            var newCard = new CardReference(cardId, amount);
+            this.Cards.Add(newCard);
+
             return true;
         }
 
-        public bool RemoveCard(string cardId) => Cards.Remove(cardId);
+        public bool RemoveCard(Guid cardId)
+        {
+            var card = this.Cards.Find(card => card.Id == cardId);
+            if (card != null) return this.Cards.Remove(card);
+            return false;
+        }
 
     }
 }

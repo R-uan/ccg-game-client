@@ -8,6 +8,7 @@ namespace GameClient.Core
 {
     public class AuthManager
     {
+        public event Action? OnAuthentication;
         private readonly HttpClient _httpClient;
         private readonly ClientState _clientState;
         public string? Token { get; private set; }
@@ -15,8 +16,10 @@ namespace GameClient.Core
         public AuthManager(ClientState clientState, AppSettings appSettings)
         {
             this._clientState = clientState;
-            this._httpClient = new HttpClient();
-            this._httpClient.BaseAddress = new Uri(appSettings.AuthServerAddr);
+            this._httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(appSettings.AuthServerAddr)
+            };
         }
 
         public async Task Login(LoginRequest credentials)
@@ -27,7 +30,9 @@ namespace GameClient.Core
                 if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
                 var response = await request.Content.ReadFromJsonAsync<LoginRespose>()
                     ?? throw new Exception("Auth API returned nothing.");
+
                 this.Token = response.Token;
+                this.OnAuthentication?.Invoke();
             }
             catch (System.Exception)
             {
@@ -52,17 +57,23 @@ namespace GameClient.Core
 
         public async Task RequestPlayerProfile()
         {
+            System.Console.WriteLine("Requesting player profile");
             if (!this.IsLoggedin())
                 throw new Exception("Client not logged in");
 
-            this._httpClient.DefaultRequestHeaders.Authorization
-                = new AuthenticationHeaderValue("Bearer", this.Token);
 
             var request = await this._httpClient.GetAsync("/api/player/profile");
             var profile = await request.Content.ReadFromJsonAsync<PlayerProfile>() ??
                 throw new Exception("Player API didn't send back data.");
 
             this._clientState.PlayerProfile = profile;
+            System.Console.WriteLine("Player profile sucessfuly requested");
+        }
+
+        public void SetBearerToken()
+        {
+            this._httpClient.DefaultRequestHeaders.Authorization
+                = new AuthenticationHeaderValue("Bearer", this.Token);
         }
 
         public bool IsLoggedin() => this.Token != null;

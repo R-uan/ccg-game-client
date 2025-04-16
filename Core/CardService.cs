@@ -13,17 +13,30 @@ namespace GameClient.Core
         public CardService(ClientState clientState, AppSettings appSettings)
         {
             this._clientState = clientState;
-            this._httpClient = new HttpClient();
-            this._httpClient.BaseAddress = new Uri(appSettings.CardServerAddr);
+            this._httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(appSettings.CardServerAddr)
+            };
         }
 
         public async Task GetCardCollectionAsync()
         {
-            var request = await this._httpClient.GetAsync("/api/cards");
+            System.Console.WriteLine("Requesting card collection");
+            var request = await this._httpClient.GetAsync("/api/cards/catalog");
             if (!request.IsSuccessStatusCode) throw new Exception("Unable to get card collection");
             var cardCollection = await request.Content.ReadFromJsonAsync<List<Card>>()
                 ?? throw new Exception("Card API didnt return anything");
             this._clientState.CardCollection = cardCollection;
+            System.Console.WriteLine("card collection successfuly gotten");
+        }
+
+        public async Task<SelectedCardsResponse> GetSelectedCardsAsync(List<Guid> cardIds)
+        {
+            var request = await this._httpClient.GetAsync("/api/cards/deck");
+            if (!request.IsSuccessStatusCode) throw new Exception("Unable to get card collection");
+            var selectedCards = await request.Content.ReadFromJsonAsync<SelectedCardsResponse>()
+                ?? throw new Exception("Card API didnt return anything");
+            return selectedCards;
         }
     }
 }

@@ -28,23 +28,13 @@ namespace GameClient.Core
 
         public async Task GetPlayerDeckCollectionAsync()
         {
-            try
-            {
-                System.Console.WriteLine("Getting player deck collection");
-                var response = await this._httpClient.GetAsync("/api/deck");
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception($"Deck API returned {response.StatusCode}");
-
-                var decks = await response.Content.ReadFromJsonAsync<List<Deck>>()
-                    ?? throw new Exception("Deck API returned no data.");
-                this._clientState.PlayerDecks = decks;
-                System.Console.WriteLine("player deck collection successfuly gotten");
-            }
-            catch (System.Exception ex)
-            {
-                System.Console.WriteLine(ex.Message);
-                throw new Exception("Failed to fetch player deck collection.");
-            }
+            Logger.Info("Fetching player deck collection...");
+            var response = await this._httpClient.GetAsync("/api/deck");
+            if (!response.IsSuccessStatusCode) throw new Exception($"Deck API returned {response.StatusCode}");
+            var decks = await response.Content.ReadFromJsonAsync<List<Deck>>()
+                ?? throw new Exception("Deck API returned no data.");
+            this._clientState.PlayerDecks = decks;
+            Logger.Info("Successfuly retrieved player's deck collection.");
         }
 
         public async Task<Deck> PostNewPlayerDeckAsync(CreateDeckRequest request)

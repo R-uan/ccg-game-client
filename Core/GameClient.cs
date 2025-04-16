@@ -69,7 +69,7 @@ public class GameClient
     public async Task Initialization()
     {
         await this.AuthManager.RequestPlayerProfile();
-        await this.CardService.GetCardCollectionAsync();
+        await this.CardService.GetCardCatalogAsync();
         await this.DeckService.GetPlayerDeckCollectionAsync();
     }
 }

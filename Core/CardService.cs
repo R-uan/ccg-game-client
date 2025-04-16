@@ -19,24 +19,37 @@ namespace GameClient.Core
             };
         }
 
-        public async Task GetCardCollectionAsync()
+        public async Task GetCardCatalogAsync()
         {
-            System.Console.WriteLine("Requesting card collection");
+            Logger.Info("Fetching card catalog...");
             var request = await this._httpClient.GetAsync("/api/cards/catalog");
             if (!request.IsSuccessStatusCode) throw new Exception("Unable to get card collection");
             var cardCollection = await request.Content.ReadFromJsonAsync<List<Card>>()
                 ?? throw new Exception("Card API didnt return anything");
             this._clientState.CardCollection = cardCollection;
-            System.Console.WriteLine("card collection successfuly gotten");
+            Logger.Info($"Found {cardCollection.Count} cards total.");
         }
 
         public async Task<SelectedCardsResponse> GetSelectedCardsAsync(List<Guid> cardIds)
         {
-            var request = await this._httpClient.GetAsync("/api/cards/deck");
-            if (!request.IsSuccessStatusCode) throw new Exception("Unable to get card collection");
-            var selectedCards = await request.Content.ReadFromJsonAsync<SelectedCardsResponse>()
-                ?? throw new Exception("Card API didnt return anything");
-            return selectedCards;
+            try
+            {
+                Logger.Info($"Fetching {cardIds.Count} selected cards...");
+                var request = await this._httpClient.PostAsJsonAsync("/api/cards/deck", cardIds);
+                if (!request.IsSuccessStatusCode) throw new Exception("Unable to get card collection");
+                var selectedCards = await request.Content.ReadFromJsonAsync<SelectedCardsResponse>()
+                    ?? throw new Exception("Card API didnt return anything");
+                Logger.Info($"Fetched {selectedCards.Cards.Count} cards sucessfully.");
+                Logger.Info($"{selectedCards.CardsNotFound.Count} cards' were not found.");
+                Logger.Info($"{selectedCards.InvalidCardGuid.Count} cards' IDs were not valid GUIDs.");
+                return selectedCards;
+
+            }
+            catch (System.Exception ex)
+            {
+                Logger.Error(ex.Message);
+                throw;
+            }
         }
     }
 }

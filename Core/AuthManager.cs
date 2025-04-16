@@ -24,50 +24,35 @@ namespace GameClient.Core
 
         public async Task Login(LoginRequest credentials)
         {
-            try
-            {
-                var request = await this._httpClient.PostAsJsonAsync("/api/auth/login", credentials);
-                if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
-                var response = await request.Content.ReadFromJsonAsync<LoginRespose>()
-                    ?? throw new Exception("Auth API returned nothing.");
-
-                this.Token = response.Token;
-                this.OnAuthentication?.Invoke();
-            }
-            catch (System.Exception)
-            {
-                throw new Exception("Unable to login.");
-            }
+            Logger.Info("Attempting to log in...");
+            var request = await this._httpClient.PostAsJsonAsync("/api/auth/login", credentials);
+            if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
+            var response = await request.Content.ReadFromJsonAsync<LoginRespose>()
+                ?? throw new Exception("Auth API returned nothing.");
+            this.Token = response.Token;
+            this.OnAuthentication?.Invoke();
+            Logger.Info("Player logged in successfuly.");
         }
 
         public async Task Register(RegisterRequest credentials)
         {
-            try
-            {
-                var request = await this._httpClient.PostAsJsonAsync("/api/auth/register", credentials);
-                if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
-                var response = await request.Content.ReadFromJsonAsync<RegisterRespose>()
-                    ?? throw new Exception("Auth API returned nothing.");
-            }
-            catch (System.Exception)
-            {
-                throw new Exception("Unable to register player.");
-            }
+            Logger.Info("Attempting to register...");
+            var request = await this._httpClient.PostAsJsonAsync("/api/auth/register", credentials);
+            if (!request.IsSuccessStatusCode) throw new Exception(await request.Content.ReadAsStringAsync());
+            var response = await request.Content.ReadFromJsonAsync<RegisterRespose>()
+                ?? throw new Exception("Auth API returned nothing.");
+            Logger.Info("Player registered successfuly.");
         }
 
         public async Task RequestPlayerProfile()
         {
-            System.Console.WriteLine("Requesting player profile");
-            if (!this.IsLoggedin())
-                throw new Exception("Client not logged in");
-
-
+            Logger.Info("Requesting player profile...");
+            if (!this.IsLoggedin()) throw new Exception("Client not logged in");
             var request = await this._httpClient.GetAsync("/api/player/profile");
             var profile = await request.Content.ReadFromJsonAsync<PlayerProfile>() ??
                 throw new Exception("Player API didn't send back data.");
-
             this._clientState.PlayerProfile = profile;
-            System.Console.WriteLine("Player profile sucessfuly requested");
+            Logger.Info("Player profile successfuly retrieved.");
         }
 
         public void SetBearerToken()

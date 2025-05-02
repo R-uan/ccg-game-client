@@ -2,8 +2,8 @@ namespace GameClient.Models
 {
     public class Deck
     {
-        public Guid DeckId { get; set; }
-        public required string DeckName { get; set; }
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
         public required List<CardReference> Cards { get; set; }
 
         public int MaxSize { get; set; }

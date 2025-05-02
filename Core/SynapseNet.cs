@@ -6,5 +6,8 @@ namespace GameClient.Core
     {
         [DllImport("libSynapseNet")]
         public extern static void start_connection(string addr, int port);
+
+        [DllImport("libSynapseNet")]
+        public extern static void connect_player(string playerId, string playerDeckId, string token);
     }
 }

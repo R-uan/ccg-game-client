@@ -14,7 +14,18 @@ static async Task run(string email, string password)
             if (client.ClientState.PlayerProfile != null && client.AuthManager.Token != null)
             {
                 SynapseNet.start_connection("127.0.0.1", 8000);
-                MatchService.ConnectPlayer(client.ClientState.PlayerProfile.Id, client.ClientState.PlayerDecks[1].Id, client.AuthManager.Token);
+                var connect = new Thread(() =>
+                {
+                    MatchService.ConnectPlayer(client.ClientState.PlayerProfile.Id, client.ClientState.PlayerDecks[1].Id, client.AuthManager.Token);
+                });
+
+                Thread.Sleep(2000);
+                while (true)
+                {
+                    System.Console.WriteLine("Read stuff");
+                    MatchService.ReadGameState();
+                    Thread.Sleep(2000);
+                }
             }
         }
     }

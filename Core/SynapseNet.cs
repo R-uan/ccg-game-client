@@ -9,5 +9,17 @@ namespace GameClient.Core
 
         [DllImport("libSynapseNet")]
         public extern static void connect_player(string playerId, string playerDeckId, string token);
+
+        [DllImport("libSynapseNet")]
+        public extern static IntPtr retrieve_gamestate(out int outSize);
+
+        [DllImport("libSynapseNet")]
+        public extern static void free_ptr(IntPtr ptr);
+
+        [DllImport("libSynapseNet")]
+        public extern static IntPtr send_packet(IntPtr messageType, string payload, int length);
+
+        [DllImport("libSynapseNet")]
+        public extern static IntPtr retrieve_error(out int outSize);
     }
 }

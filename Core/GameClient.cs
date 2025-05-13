@@ -1,4 +1,3 @@
-using System;
 using System.Text.Json;
 using GameClient.Requests;
 using GameClient.Settings;
@@ -9,25 +8,28 @@ namespace GameClient.Core;
 public class GameClient
 {
     public AppSettings AppSettings { get; private set; }
+
     /// Services
     public AuthManager AuthManager { get; private set; }
     public DeckService DeckService { get; private set; }
     public CardService CardService { get; private set; }
+    public MatchService MatchService { get; private set; }
+
     /// States
     public ClientState ClientState { get; private set; }
 
+
     public GameClient()
     {
-        var configuration = JsonSerializer.Deserialize<AppSettings>(
-            File.ReadAllText("settings.json")
-        ) ?? throw new Exception("Could not get app settings.");
-
+        var configuration = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText("settings.json")) ??
+                            throw new Exception("Could not get app settings.");
         this.AppSettings = configuration;
         this.ClientState = new ClientState();
         this.CardService = new CardService(this.ClientState, this.AppSettings);
         this.AuthManager = new AuthManager(this.ClientState, this.AppSettings);
+        this.MatchService = new MatchService(this.AuthManager, this.ClientState);
         this.DeckService = new DeckService(this.AuthManager, this.ClientState, this.AppSettings);
-
+        
         AuthManager.OnAuthentication += this.DeckService.SetBearerToken;
         AuthManager.OnAuthentication += this.AuthManager.SetBearerToken;
     }
@@ -38,12 +40,12 @@ public class GameClient
         {
             var loginValidator = new LoginRequestValidator();
             var credentials = new LoginRequest(email, password);
-            var validateRequest = loginValidator.Validate(credentials);
+            var validateRequest = await loginValidator.ValidateAsync(credentials);
             if (!validateRequest.IsValid) return Result<bool>.Fail(validateRequest.Errors.First().ErrorMessage);
             await this.AuthManager.Login(credentials);
             return Result<bool>.Ok(true);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             return Result<bool>.Fail(ex.Message);
         }
@@ -55,12 +57,12 @@ public class GameClient
         {
             var registerValidator = new RegisterRequestValidator();
             var credentials = new RegisterRequest(email, username, password);
-            var validateRequest = registerValidator.Validate(credentials);
+            var validateRequest = await registerValidator.ValidateAsync(credentials);
             if (!validateRequest.IsValid) return Result<bool>.Fail(validateRequest.Errors.First().ErrorMessage);
             await this.AuthManager.Register(credentials);
             return Result<bool>.Ok(true);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             return Result<bool>.Fail(ex.Message);
         }
@@ -68,8 +70,8 @@ public class GameClient
 
     public async Task Initialization()
     {
-        await this.AuthManager.RequestPlayerProfile();
-        await this.CardService.GetCardCatalogAsync();
-        await this.DeckService.GetPlayerDeckCollectionAsync();
+        await this.AuthManager.FetchPlayerProfile();
+        await this.CardService.FetchCardCatalogAsync();
+        await this.DeckService.FetchPlayerDeckCollectionAsync();
     }
 }

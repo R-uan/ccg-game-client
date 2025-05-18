@@ -22,7 +22,7 @@ namespace GameClient
                 _ => "[LOG]"
             };
 
-            string output = $"{prefix} [{DateTime.Now:HH:mm:ss}] - {caller}: {message}";
+            string output = $"{prefix} [{DateTime.Now.Date:dd/MM/yyyy} {DateTime.Now:HH:mm:ss}] {caller}: {message}";
             System.Console.WriteLine(output);
         }
     }

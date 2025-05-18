@@ -8,13 +8,13 @@ namespace GameClient.Core
     public static class SynapseNet
     {
         [DllImport("libSynapseNet")]
-        private static extern bool start_connection(string addr, int port);
+        private static extern int start_connection(string addr, int port);
 
         [DllImport("libSynapseNet")]
-        private static extern long connect_player(string playerId, string playerDeckId, string token);
+        private static extern int connect_player(string playerId, string playerDeckId, string token);
 
         [DllImport("libSynapseNet")]
-        private static extern IntPtr retrieve_gamestate(out int outSize);
+        private static extern IntPtr retrieve_game_state(out int outSize);
 
         [DllImport("libSynapseNet")]
         private static extern IntPtr retrieve_error(out int outSize);
@@ -23,7 +23,7 @@ namespace GameClient.Core
         private static extern void free_ptr(IntPtr ptr);
         
         [DllImport("libSynapseNet")]
-        private static extern long play_card(byte[] payload, int length);
+        private static extern int play_card(byte[] payload, int length);
 
         public static bool PlayCard(Guid cardId)
         {
@@ -46,7 +46,7 @@ namespace GameClient.Core
         }
         
         // The address of the server will be dynamic later on.
-        public static bool ConnectToServer()
+        public static int ConnectToServer()
             => SynapseNet.start_connection("127.0.0.1", 8000);
 
         public static Result<byte[]> RetrieveError()
@@ -67,7 +67,7 @@ namespace GameClient.Core
         
         public static Result<byte[]> RetrieveGameState()
         {
-            IntPtr ptr = SynapseNet.retrieve_gamestate(out int size);
+            IntPtr ptr = SynapseNet.retrieve_game_state(out int size);
             if (ptr == IntPtr.Zero)
                 return Result<byte[]>.Fail("No Game State packet was retrieved.");
             

@@ -29,7 +29,7 @@ namespace GameClient.Core
                            throw new ParsingResponseException("Unable to parse login response.");
             this.Token = response.Token;
             this.OnAuthentication?.Invoke();
-            Logger.Info("Player logged in successfully.");
+            Logger.Debug("Player logged in successfully.");
         }
 
         public async Task Register(RegisterRequest credentials)

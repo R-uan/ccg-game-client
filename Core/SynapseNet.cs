@@ -80,7 +80,8 @@ namespace GameClient.Core
             
             return Result<byte[]>.Ok(bytes);
         }
-        
-        
+
+        public static int ConnectPlayer(string playerId, string playerDeckId, string authToken)
+            => SynapseNet.connect_player(playerId, playerDeckId, authToken);
     }
 }

@@ -8,7 +8,7 @@ namespace GameClient.Core
     public class MatchService
     {
         private Thread GameStateThread { get;  set; }
-        public bool Connected { get; private set; }
+        private bool Connected { get; set; }
         private AuthManager AuthManager { get; }
         private ClientState ClientState { get; }
 
@@ -39,6 +39,24 @@ namespace GameClient.Core
             return Task.CompletedTask;
         }
 
+        public Task ConnectPlayer()
+        {
+            if (this.Connected)
+            {
+                var authToken = AuthManager.Token;
+                var currentDeckId = this.ClientState.PlayerDecks?[0].Id.ToString();
+                var playerId = this.ClientState.PlayerProfile?.Id.ToString();
+                Logger.Debug($"{authToken} - {currentDeckId} - {playerId}");
+                if (authToken != null && currentDeckId != null && playerId != null)
+                {
+                    Logger.Info("Attempting to connect player to match...");
+                    SynapseNet.ConnectPlayer(playerId, currentDeckId, authToken);
+                }
+            }
+            
+            return Task.CompletedTask;
+        }
+        
         private void CycleGameStateRetrival()
         {
             Logger.Info("Listening to game state");

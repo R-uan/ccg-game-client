@@ -5,10 +5,19 @@ namespace GameClient
     {
         public static async Task Main()
         {
-            Console.WriteLine("Hello World!");
             var game = new Core.GameClient();
-            await game.MatchService.ConnectToMatch();
-            
+            var login = await game.Login("gameclient@test.com", "1234cinco");
+            if (login.Success)
+            {
+                await game.Initialization();   
+                await game.MatchService.ConnectToMatch();
+                await game.MatchService.ConnectPlayer();
+                
+            }
+            else
+            {
+                Logger.Error("Failed to login");
+            }
             Console.ReadKey();
         }
     }

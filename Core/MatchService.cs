@@ -50,7 +50,24 @@ namespace GameClient.Core
                 if (authToken != null && currentDeckId != null && playerId != null)
                 {
                     Logger.Info("Attempting to connect player to match...");
-                    SynapseNet.ConnectPlayer(playerId, currentDeckId, authToken);
+                    SynapseNet.ConnectPlayerToMatchServer(new MatchConnectionInfo(playerId, currentDeckId, authToken));
+                }
+            }
+            
+            return Task.CompletedTask;
+        }
+        
+        public Task ReconnectPlayer()
+        {
+            if (this.Connected)
+            {
+                var authToken = AuthManager.Token;
+                var currentDeckId = this.ClientState.PlayerDecks?[0].Id.ToString();
+                var playerId = this.ClientState.PlayerProfile?.Id.ToString();
+                if (authToken != null && currentDeckId != null && playerId != null)
+                {
+                    Logger.Info("Attempting to connect player to match...");
+                    SynapseNet.ReconnectPlayerToMatchServer(new MatchReconnectionInfo(playerId, authToken));
                 }
             }
             

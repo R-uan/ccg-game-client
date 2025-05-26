@@ -1,8 +1,5 @@
-namespace GameClient.Models;
-
-public class MatchConnectionInfo
+namespace GameClient.Models
 {
-    public required string PlayerId { get; set; }
-    public required string CurrentDeckId { get; set; }
-    public required string PlayerAuthToken { get; set; }
+    public record MatchConnectionInfo(string PlayerId, string CurrentDeckId,string PlayerAuthToken) {}
+    public record MatchReconnectionInfo(string PlayerId, string PlayerAuthToken) {}
 }

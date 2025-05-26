@@ -12,6 +12,9 @@ namespace GameClient.Core
 
         [DllImport("libSynapseNet")]
         private static extern int connect_player(string playerId, string playerDeckId, string token);
+        
+        [DllImport("libSynapseNet")]
+        private static extern int reconnect_player(string playerId, string token);
 
         [DllImport("libSynapseNet")]
         private static extern IntPtr retrieve_game_state(out int outSize);
@@ -42,6 +45,12 @@ namespace GameClient.Core
         public static bool ConnectPlayerToMatchServer(MatchConnectionInfo info)
         {
             var bytesSend = SynapseNet.connect_player(info.PlayerId, info.CurrentDeckId, info.PlayerAuthToken);
+            return bytesSend > 0;
+        }
+        
+        public static bool ReconnectPlayerToMatchServer(MatchReconnectionInfo info)
+        {
+            var bytesSend = SynapseNet.reconnect_player(info.PlayerId, info.PlayerAuthToken);
             return bytesSend > 0;
         }
         
@@ -80,8 +89,5 @@ namespace GameClient.Core
             
             return Result<byte[]>.Ok(bytes);
         }
-
-        public static int ConnectPlayer(string playerId, string playerDeckId, string authToken)
-            => SynapseNet.connect_player(playerId, playerDeckId, authToken);
     }
 }

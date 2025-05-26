@@ -47,7 +47,7 @@ namespace GameClient.Core
         {
             Logger.Info("Requesting player profile...");
             if (!this.IsLoggedIn()) throw new PlayerNotAuthenticatedException("Client not logged in");
-            var request = await this._httpClient.GetAsync("/api/player/profile");
+            var request = await this._httpClient.GetAsync("/api/player/account");
             var profile = await request.Content.ReadFromJsonAsync<PlayerProfile>() ??
                           throw new ParsingResponseException("Unable to parse player profile response.");
             this._clientState.PlayerProfile = profile;

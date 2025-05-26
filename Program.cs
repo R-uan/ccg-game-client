@@ -11,8 +11,7 @@ namespace GameClient
             {
                 await game.Initialization();   
                 await game.MatchService.ConnectToMatch();
-                await game.MatchService.ConnectPlayer();
-                
+                await game.MatchService.ReconnectPlayer();
             }
             else
             {

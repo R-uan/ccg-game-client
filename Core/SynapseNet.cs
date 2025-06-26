@@ -26,19 +26,14 @@ namespace GameClient.Core
         private static extern void free_ptr(IntPtr ptr);
         
         [DllImport("libSynapseNet")]
-        private static extern int play_card(byte[] payload, int length);
+        private static extern int play_card(string cardId, string actorId, string? targetId, string? targetPosition);
 
-        public static bool PlayCard(Guid cardId)
+        public static bool PlayCard(Guid cardId, Guid actorId, Guid? targetId, string? targetPosition)
         {
             // This is the object that will be converted into CBOR bytes.
             // For now, it will be an anonymous object as the composition is
             // pretty simple and won't be required to be deserialized into a C# object later.
-            var payloadObject = new { cardId = cardId };
-            var cbor = CBORObject.FromObject(payloadObject);
-            var cborBytes = cbor.EncodeToBytes();
-
-            var bytesSent = SynapseNet.play_card(cborBytes, cborBytes.Length);
-
+            var bytesSent = SynapseNet.play_card(cardId.ToString()!, actorId.ToString()!, targetId.ToString(), targetPosition);
             return bytesSent > 0;
         }
         

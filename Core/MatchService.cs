@@ -5,19 +5,12 @@ using GameClient.Models;
 
 namespace GameClient.Core
 {
-    public class MatchService
+    public class MatchService(AuthManager authManager, ClientState clientState)
     {
-        private Thread GameStateThread { get;  set; }
-        private bool Connected { get; set; }
-        private AuthManager AuthManager { get; }
-        private ClientState ClientState { get; }
-
-        public MatchService(AuthManager authManager, ClientState clientState)
-        {
-            this.Connected = false;
-            this.AuthManager = authManager;
-            this.ClientState = clientState;
-        }
+        private Thread? GameStateThread { get;  set; }
+        private bool Connected { get; set; } = false;
+        private AuthManager AuthManager { get; } = authManager;
+        private ClientState ClientState { get; } = clientState;
 
         public Task ConnectToMatch()
         {
@@ -45,7 +38,7 @@ namespace GameClient.Core
             {
                 var authToken = AuthManager.Token;
                 var currentDeckId = this.ClientState.PlayerDecks?[0].Id.ToString();
-                var playerId = this.ClientState.PlayerProfile?.Id.ToString();
+                var playerId = this.ClientState.PlayerAccount?.Id.ToString();
                 Logger.Debug($"{authToken} - {currentDeckId} - {playerId}");
                 if (authToken != null && currentDeckId != null && playerId != null)
                 {
@@ -63,12 +56,25 @@ namespace GameClient.Core
             {
                 var authToken = AuthManager.Token;
                 var currentDeckId = this.ClientState.PlayerDecks?[0].Id.ToString();
-                var playerId = this.ClientState.PlayerProfile?.Id.ToString();
+                var playerId = this.ClientState.PlayerAccount?.Id.ToString();
                 if (authToken != null && currentDeckId != null && playerId != null)
                 {
                     Logger.Info("Attempting to connect player to match...");
                     SynapseNet.ReconnectPlayerToMatchServer(new MatchReconnectionInfo(playerId, authToken));
                 }
+            }
+            
+            return Task.CompletedTask;
+        }
+
+        public Task PlayCard()
+        {
+            var deck = ClientState.PlayerDecks?[0].Cards;
+            if (deck != null)
+            {
+                var card = deck[0].Id;
+                var actor = ClientState.PlayerAccount!.Id;
+                SynapseNet.PlayCard(card, actor, null, null);
             }
             
             return Task.CompletedTask;
@@ -89,7 +95,6 @@ namespace GameClient.Core
                 {
                     Logger.Info($"Retrieved GameState of {gameState.Value!.Length} bytes.");
                 }
-                
             }
         }
     }

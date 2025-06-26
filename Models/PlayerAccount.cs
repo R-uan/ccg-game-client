@@ -2,7 +2,7 @@ using System;
 
 namespace GameClient.Models
 {
-    public class PlayerProfile
+    public class PlayerAccount
     {
         public Guid Id { get; set; }
         public required string Email { get; set; }

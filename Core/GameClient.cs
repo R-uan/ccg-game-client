@@ -7,7 +7,7 @@ namespace GameClient.Core
 {
     public class GameClient
     {
-        public AppSettings AppSettings { get; private set; }
+        private AppSettings AppSettings { get; set; }
 
         /// Services
         public AuthManager AuthManager { get; private set; }
@@ -21,14 +21,15 @@ namespace GameClient.Core
 
         public GameClient()
         {
-            var configuration = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText("settings.json")) ??
+            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText("settings.json")) ??
                                 throw new Exception("Could not get app settings.");
-            this.AppSettings = configuration;
+            this.AppSettings = settings;
             this.ClientState = new ClientState();
             this.CardService = new CardService(this.ClientState, this.AppSettings);
             this.AuthManager = new AuthManager(this.ClientState, this.AppSettings);
             this.MatchService = new MatchService(this.AuthManager, this.ClientState);
             this.DeckService = new DeckService(this.AuthManager, this.ClientState, this.AppSettings);
+
             AuthManager.OnAuthentication += this.DeckService.SetBearerToken;
             AuthManager.OnAuthentication += this.AuthManager.SetBearerToken;
         }
@@ -69,7 +70,7 @@ namespace GameClient.Core
 
         public async Task Initialization()
         {
-            await this.AuthManager.FetchPlayerProfile();
+            await this.AuthManager.FetchPlayerAccountData();
             await this.CardService.FetchCardCatalogAsync();
             await this.DeckService.FetchPlayerDeckCollectionAsync();
         }

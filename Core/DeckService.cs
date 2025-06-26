@@ -1,3 +1,4 @@
+using System.Net;
 using GameClient.Models;
 using GameClient.Requests;
 using GameClient.Settings;
@@ -7,58 +8,46 @@ using GameClient.Exceptions;
 
 namespace GameClient.Core
 {
-    public class DeckService
+    public class DeckService(AuthManager authManager, ClientState clientState, AppSettings appSettings)
     {
-        private readonly HttpClient _httpClient;
-        private readonly AuthManager _authManager;
-        private readonly ClientState _clientState;
-
-        public DeckService(AuthManager authManager, ClientState clientState, AppSettings appSettings)
-        {
-            this._authManager = authManager;
-            this._clientState = clientState;
-            this._httpClient = new HttpClient() { BaseAddress = new Uri(appSettings.DeckServerAddr) };
-        }
+        private readonly HttpClient _httpClient = new() { BaseAddress = new Uri(appSettings.DeckServerAddr) };
 
         public async Task FetchPlayerDeckCollectionAsync()
         {
-            try
+            Logger.Info("Fetching player deck collection...");
+            var response = await this._httpClient.GetAsync("/api/deck");
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                Logger.Info("Fetching player deck collection...");
-                var response = await this._httpClient.GetAsync("/api/deck");
-                if (!response.IsSuccessStatusCode)
-                    throw new DeckRequestException($"Deck API returned {response.StatusCode}");
-                var decks = await response.Content.ReadFromJsonAsync<List<Deck>>() ??
-                            throw new ParsingResponseException("Unable to parse player deck response.");
-                this._clientState.PlayerDecks = decks;
-                Logger.Info("Successfully retrieved player's deck collection.");
+                var decks = await response.Content.ReadFromJsonAsync<List<Deck>>();
+                if (decks == null) throw new ParsingResponseException("Unable to parse player deck response");
+                Logger.Info("Deck Collection API: Successfully retrieved player's deck collection.");
+                clientState.PlayerDecks = decks;
+                return;
             }
-            catch (Exception e)
-            {
-                throw new DeckRequestException(e.Message);
-            }
+
+            var responseMessage = await response.Content.ReadAsStringAsync();
+            Logger.Error($"Deck Collection API: ({response.StatusCode}) -> {responseMessage}");
+            throw new DeckRequestException("Unable to fetch player's deck collection");
         }
 
         public async Task<Deck> PostPlayerDeckAsync(CreateDeckRequest request)
         {
-            try
+            var response = await this._httpClient.PostAsJsonAsync("/api/deck", request);
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                var response = await this._httpClient.PostAsJsonAsync("/api/deck", request);
-                if (!response.IsSuccessStatusCode) throw new DeckRequestException("Deck creation request failed.");
-                var deck = await response.Content.ReadFromJsonAsync<Deck>() ??
-                           throw new ParsingResponseException("Unable to parse create deck response.");
+                var deck = await response.Content.ReadFromJsonAsync<Deck>();
+                if (deck == null) throw new ParsingResponseException("Unable to parse create deck response");
+                Logger.Info("Deck Collection API: Successfully created player's deck.");
                 return deck;
             }
-            catch (Exception e)
-            {
-                throw new DeckRequestException(e.Message);
-            }
+
+            var responseMessage = await response.Content.ReadAsStringAsync();
+            Logger.Error($"Deck Collection API: ({response.StatusCode}) -> {responseMessage}");
+            throw new DeckRequestException("Unable to create deck");
         }
 
         public void SetBearerToken()
-        {
-            this._httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", this._authManager.Token);
-        }
+            => this._httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", authManager.Token);
     }
 }

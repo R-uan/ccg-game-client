@@ -9,13 +9,14 @@ namespace GameClient
             var login = await game.Login("gameclient@test.com", "1234cinco");
             if (login.Success)
             {
-                await game.Initialization();   
-                await game.MatchService.ConnectToMatch();
-                await game.MatchService.ReconnectPlayer();
+                await game.Initialization();
+                Thread.Sleep(2000);
+                await game.MatchService.PlayCard();
             }
             else
             {
                 Logger.Error("Failed to login");
+                Logger.Error(login.Error);
             }
             Console.ReadKey();
         }

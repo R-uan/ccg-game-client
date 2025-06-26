@@ -9,6 +9,6 @@ namespace GameClient.Core
         public bool IsLogged { get; set; } = false;
         public List<Deck>? PlayerDecks { get; set; }
         public List<Card>? CardCollection { get; set; }
-        public PlayerProfile? PlayerProfile { get; set; }
+        public PlayerAccount? PlayerAccount { get; set; }
     }
 }
